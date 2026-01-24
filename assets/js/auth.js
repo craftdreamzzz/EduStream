@@ -46,50 +46,37 @@ const Auth = {
         try {
             Utils.showLoader(true);
 
-            // Load users data
-            const users = await Utils.loadJSON(CONFIG.DATA_FILES.USERS);
-            
-            if (!users || !users[username]) {
-                throw new Error('Invalid username or password');
-            }
+            const response = await API.call(CONFIG.API.ENDPOINTS.AUTH, 'POST', {
+                username,
+                password,
+                role: 'student'
+            });
 
-            const user = users[username];
-
-            // Verify password
-            if (user.password !== password) {
-                throw new Error('Invalid username or password');
-            }
-
-            // Check if account is active
-            if (!user.active) {
-                throw new Error('Your account has been disabled. Please contact admin.');
-            }
-
-            // Check expiry
-            if (Utils.isDatePassed(user.expiry)) {
-                throw new Error('Your account has expired. Please contact admin to renew.');
+            if (!response.success) {
+                throw new Error('Login failed');
             }
 
             // Create session
             const session = {
-                username: username,
-                name: user.name,
-                course: user.course,
-                expiry: user.expiry,
+                ...response.user,
                 loginTime: new Date().toISOString()
             };
 
-            // Save session
             Utils.setStorage(CONFIG.STORAGE_KEYS.USER_SESSION, session);
             Utils.updateLastActivity();
 
             // Track login
-            this.trackLogin(username, 'student');
+            await API.trackActivity('login', {
+                username,
+                role: 'student',
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                device: Utils.isMobile() ? 'mobile' : 'desktop'
+            });
 
             Utils.showLoader(false);
-            Utils.showToast(`Welcome back, ${user.name}!`, 'success');
+            Utils.showToast(`Welcome back, ${response.user.name}!`, 'success');
 
-            // Redirect to dashboard
             setTimeout(() => {
                 window.location.href = './student/dashboard.html';
             }, 500);
@@ -108,14 +95,18 @@ const Auth = {
         try {
             Utils.showLoader(true);
 
-            // Verify admin credentials
-            if (username !== CONFIG.ADMIN.username || password !== CONFIG.ADMIN.password) {
+            const response = await API.call(CONFIG.API.ENDPOINTS.AUTH, 'POST', {
+                username,
+                password,
+                role: 'admin'
+            });
+
+            if (!response.success) {
                 throw new Error('Invalid admin credentials');
             }
 
-            // Create admin session
             const session = {
-                username: username,
+                username,
                 role: 'admin',
                 loginTime: new Date().toISOString()
             };
@@ -124,12 +115,17 @@ const Auth = {
             Utils.updateLastActivity();
 
             // Track login
-            this.trackLogin(username, 'admin');
+            await API.trackActivity('login', {
+                username,
+                role: 'admin',
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                device: Utils.isMobile() ? 'mobile' : 'desktop'
+            });
 
             Utils.showLoader(false);
             Utils.showToast('Admin login successful!', 'success');
 
-            // Redirect to admin dashboard
             setTimeout(() => {
                 window.location.href = './admin/index.html';
             }, 500);

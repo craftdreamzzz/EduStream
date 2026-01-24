@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Mehandi Learning Portal</title>
+    <title>Admin Dashboard - CraftDreamzzz Learning Portal</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -19,10 +19,10 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <span class="text-3xl">🛡️</span>
-                    <div>
-                        <h1 class="text-xl font-bold">Admin Dashboard</h1>
-                        <p class="text-sm text-red-100">Mehandi Learning Portal</p>
-                    </div>
+                        <div>
+                            <h1 class="text-xl font-bold">Admin Dashboard</h1>
+                            <p class="text-sm text-red-100" id="adminPortalName">CraftDreamzzz Learning Portal</p>
+                        </div>
                 </div>
                 <button 
                     onclick="logout()" 
@@ -187,16 +187,15 @@
             <div class="bg-white rounded-xl shadow-lg p-6" data-aos="fade-up">
                 <h2 class="text-2xl font-bold text-gray-800 mb-6">System Settings</h2>
                 
-                <div class="space-y-6">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-700 mb-3">Admin Credentials</h3>
-                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-                            <p class="text-sm text-yellow-700">
-                                ⚠️ <strong>Important:</strong> Change default admin credentials in <code>config.js</code>
-                            </p>
-                        </div>
+                <!-- Dynamic Settings Container -->
+                <div id="settingsContainer">
+                    <div class="text-center py-8">
+                        <div class="spinner mx-auto mb-4"></div>
+                        <p class="text-gray-500">Loading settings...</p>
                     </div>
+                </div>
 
+                <div class="mt-8 space-y-6">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-700 mb-3">Data Management</h3>
                         <div class="flex flex-wrap gap-3">
@@ -212,8 +211,8 @@
                     <div>
                         <h3 class="text-lg font-semibold text-gray-700 mb-3">System Information</h3>
                         <div class="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
-                            <p><strong>Version:</strong> <span id="appVersion"></span></p>
-                            <p><strong>Mode:</strong> <span class="badge badge-info">GitHub Pages (Static)</span></p>
+                            <p><strong>Version:</strong> 2.0.0</p>
+                            <p><strong>Mode:</strong> <span class="badge badge-info">MongoDB + Vercel</span></p>
                             <p><strong>Last Updated:</strong> <span id="lastUpdated"></span></p>
                         </div>
                     </div>
@@ -241,7 +240,21 @@
         // Initialize dashboard
         window.addEventListener('DOMContentLoaded', async () => {
             if (!Auth.requireAuth(true)) return;
+            
+            // Load settings and update UI
+            try {
+                const settings = await API.getSettings();
+                if (settings) {
+                    document.getElementById('adminPortalName').textContent = settings.appName;
+                }
+            } catch (error) {
+                console.log('Using default settings');
+            }
+            
             await AdminDashboard.init();
+            
+            // Update last updated timestamp
+            document.getElementById('lastUpdated').textContent = new Date().toLocaleDateString();
         });
     </script>
 </body>

@@ -24,9 +24,9 @@
         
         <!-- Logo & Title -->
         <div class="text-center mb-8 animate-slideUp" data-aos="fade-down">
-            <div class="text-6xl mb-4 animate-float">🔧</div>
-            <h1 class="text-4xl font-bold text-white mb-2">Mehandi Learning</h1>
-            <p class="text-white text-opacity-90">Master the art of Hena Design</p>
+            <div class="text-6xl mb-4 animate-float">🎨</div>
+            <h1 class="text-4xl font-bold text-white mb-2" id="appTitle">CraftDreamzzz Learning</h1>
+            <p class="text-white text-opacity-90" id="appTagline">Master the Art of Henna Design</p>
         </div>
 
         <!-- Login Card -->
@@ -138,7 +138,12 @@
 
         <!-- Footer -->
         <div class="text-center mt-6 text-white text-opacity-80 text-sm">
-            <p>© 2026 Mehandi Learning Portal. All rights reserved.</p>
+            <p id="footerText">© 2026 CraftDreamzzz Learning Portal. All rights reserved.</p>
+            <p class="mt-2">
+                <a href="mailto:craftdreamzzz@gmail.com" class="hover:text-white">📧 craftdreamzzz@gmail.com</a>
+                <span class="mx-2">|</span>
+                <a href="tel:+918277414796" class="hover:text-white">📞 +91 82774 14796</a>
+            </p>
         </div>
     </div>
 
@@ -147,6 +152,22 @@
     <script src="./assets/js/config.js"></script>
     <script src="./assets/js/utils.js"></script>
     <script src="./assets/js/auth.js"></script>
+
+    <script>
+    // Load dynamic settings
+    window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const settings = await API.getSettings();
+                if (settings) {
+                    document.getElementById('appTitle').textContent = settings.appName;
+                    document.getElementById('appTagline').textContent = settings.tagline;
+                    document.getElementById('footerText').textContent = `© 2026 ${settings.appName}. All rights reserved.`;
+                }
+            } catch (error) {
+                console.log('Using default settings');
+            }
+        });
+    </script>
     
     <script>
         // Initialize AOS

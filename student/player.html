@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Player - Mehandi Learning Portal</title>
+    <title>Video Player - CraftDreamzzz Learning Portal</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../assets/css/main.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
     
     <style>
         body { background: #000; }
@@ -117,9 +117,9 @@
         <div class="bg-gray-900 text-white rounded-lg p-8 max-w-md mx-4 text-center">
             <div class="text-6xl mb-4">⚠️</div>
             <h2 class="text-2xl font-bold mb-4">Important Notice</h2>
-            <p class="mb-4">This content is protected and for your personal use only.</p>
+            <p class="mb-4">This henna design tutorial is for your personal learning only.</p>
             <p class="text-gray-400 text-sm mb-6">
-                Recording, sharing, or distributing this video is strictly prohibited and may result in account termination.
+                Recording, sharing, or distributing this video is strictly prohibited and may result in account termination. Respect the artist's work. 🎨
             </p>
             <button 
                 onclick="dismissWarning()"
@@ -210,6 +210,17 @@
 
             // Load and play video
             currentVideo = await VideoPlayer.loadVideo(videoId);
+
+            // Track video view
+            if (currentVideo) {
+                await API.trackActivity('video_view', {
+                    videoId,
+                    username: currentUser.username,
+                    timestamp: new Date().toISOString(),
+                    device: Utils.isMobile() ? 'mobile' : 'desktop',
+                    userAgent: navigator.userAgent
+                });
+            }
             
             if (!currentVideo) {
                 Utils.showToast('Video not found', 'error');

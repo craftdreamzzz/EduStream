@@ -1,35 +1,38 @@
 // Application Configuration
 const CONFIG = {
-    APP_NAME: 'Mehandi Learning Portal',
-    VERSION: '1.0.0',
+    APP_NAME: 'CraftDreamzzz Learning Portal',
+    VERSION: '2.0.0',
     
-    // Course Configuration
+    // Course Configuration - Updated for Henna Design
     COURSES: {
         BASIC: {
             name: 'Basic Course',
             duration: 1, // months
             color: '#10b981',
-            icon: '🔧'
+            icon: '🎨',
+            description: 'Foundation of Henna Art'
         },
         INTERMEDIATE: {
             name: 'Intermediate Course',
             duration: 2,
             color: '#3b82f6',
-            icon: '⚙️'
+            icon: '✨',
+            description: 'Advanced Henna Techniques'
         },
-        ADVANCED: {
-            name: 'Advanced Course',
+        PROFESSIONAL: {
+            name: 'Professional Course',
             duration: 3,
             color: '#8b5cf6',
-            icon: '🏆'
+            icon: '👑',
+            description: 'Master Henna Artist Level'
         }
     },
-
+    
     // Video Schedule
     VIDEO_DAYS: ['Monday', 'Thursday'],
     
     // Session Configuration
-    SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes in milliseconds
+    SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
     ACTIVITY_CHECK_INTERVAL: 60 * 1000, // 1 minute
     
     // Storage Keys
@@ -39,35 +42,28 @@ const CONFIG = {
         THEME: 'theme_preference'
     },
     
-    // API Configuration (for future AWS migration)
+    // API Endpoints
     API: {
-        BASE_URL: window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000/api' 
-            : 'https://your-aws-domain.com/api',
+        BASE_URL: window.location.origin,
         ENDPOINTS: {
-            LOGIN: '/auth/login',
-            LOGOUT: '/auth/logout',
-            VIDEOS: '/videos',
-            USERS: '/users',
-            ANALYTICS: '/analytics'
+            AUTH: '/api/auth',
+            STUDENTS: '/api/students',
+            VIDEOS: '/api/videos',
+            ANALYTICS: '/api/analytics',
+            SETTINGS: '/api/settings'
         }
     },
     
-    // Data Files (GitHub Pages - static mode)
-    DATA_FILES: {
-        USERS: './data/users.json',
-        VIDEOS: './data/videos.json',
-        SESSIONS: './data/sessions.json'
-    },
-    
-    // Admin Credentials (Change these!)
-    ADMIN: {
-        username: 'admin',
-        password: 'Admin@123' // CHANGE THIS IMMEDIATELY
+    // Contact Information (editable via admin panel)
+    CONTACT: {
+        WHATSAPP: '+918277414796',
+        EMAIL: 'craftdreamzzz@gmail.com',
+        ARTIST: 'Lavanya',
+        ADDRESS: 'Hebri, Udupi, Karnataka'
     }
 };
 
-// Export for module usage (future AWS migration)
+// Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = CONFIG;
 }

@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard - Mehandi Learning Portal</title>
+    <title>Student Dashboard - CraftDreamzzz Learning Portal</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/main.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
 </head>
 <body class="bg-gray-50 min-h-screen">
     
@@ -17,9 +17,9 @@
         <div class="container mx-auto px-4 py-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                    <span class="text-3xl">🔧</span>
+                    <span class="text-3xl">🎨</span>
                     <div>
-                        <h1 class="text-xl font-bold text-gray-800">Mehandi Learning</h1>
+                        <h1 class="text-xl font-bold text-gray-800" id="portalName">CraftDreamzzz</h1>
                         <p class="text-sm text-gray-500" id="welcomeText">Loading...</p>
                     </div>
                 </div>
@@ -83,6 +83,30 @@
             </div>
         </div>
 
+        <!-- Contact & Support Section -->
+        <div class="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl p-6 mb-8" data-aos="fade-up">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">Need Help?</h3>
+                    <p class="text-white text-opacity-90">Contact your instructor</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="tel:+918277414796" class="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-all flex items-center space-x-2">
+                        <span>📞</span>
+                        <span id="contactPhone">Call Now</span>
+                    </a>
+                    <a href="https://wa.me/918277414796" target="_blank" class="bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-all flex items-center space-x-2">
+                        <span>💬</span>
+                        <span>WhatsApp</span>
+                    </a>
+                    <a href="mailto:craftdreamzzz@gmail.com" class="bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-all flex items-center space-x-2">
+                        <span>📧</span>
+                        <span>Email</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- Video List Section -->
         <div class="bg-white rounded-xl shadow-lg p-6" data-aos="fade-up">
             <div class="flex items-center justify-between mb-6">
@@ -135,6 +159,22 @@
             if (!Auth.requireAuth()) return;
 
             const user = Auth.getCurrentUser();
+            
+            // Load settings and update UI
+            try {
+                const settings = await API.getSettings();
+                if (settings) {
+                    document.getElementById('portalName').textContent = settings.appName.split(' ')[0]; // First word
+                    document.getElementById('contactPhone').textContent = settings.whatsapp;
+                    
+                    // Update contact links
+                    document.querySelector('a[href^="tel:"]').href = `tel:${settings.whatsapp}`;
+                    document.querySelector('a[href^="https://wa.me/"]').href = `https://wa.me/${settings.whatsapp.replace(/\D/g, '')}`;
+                    document.querySelector('a[href^="mailto:"]').href = `mailto:${settings.email}`;
+                }
+            } catch (error) {
+                console.log('Using default settings');
+            }
             
             // Load dashboard data
             await StudentDashboard.init(user);

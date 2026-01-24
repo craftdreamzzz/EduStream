@@ -1,10 +1,10 @@
 // Admin Dashboard Module
 
 const AdminDashboard = {
-    students: {},
-    videos: {},
-    sessions: [],
-    views: [],
+    students: [],
+    videos: [],
+    stats: {},
+    settings: null,
 
     async init() {
         await this.loadAllData();
@@ -12,18 +12,16 @@ const AdminDashboard = {
         this.displayStudents();
         this.displayVideos();
         this.loadAnalytics();
-        this.loadSettings();
+        await this.loadSettings();
     },
 
     async loadAllData() {
         try {
             Utils.showLoader(true);
             
-            // Load all data files
-            this.students = await Utils.loadJSON('../data/users.json') || {};
-            this.videos = await Utils.loadJSON('../data/videos.json') || {};
-            this.sessions = Utils.getStorage('login_sessions') || [];
-            this.views = Utils.getStorage('video_views') || [];
+            this.students = await API.getStudents();
+            this.videos = await API.getVideos();
+            this.stats = await API.getAnalytics('stats');
             
             Utils.showLoader(false);
         } catch (error) {
@@ -33,29 +31,119 @@ const AdminDashboard = {
         }
     },
 
+    async loadSettings() {
+        try {
+            this.settings = await API.getSettings();
+            this.displaySettings();
+        } catch (error) {
+            console.error('Error loading settings:', error);
+        }
+    },
+
+    displaySettings() {
+        if (!this.settings) return;
+
+        const settingsContainer = document.getElementById('settingsContainer');
+        if (!settingsContainer) return;
+
+        settingsContainer.innerHTML = `
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">Portal Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">App Name</label>
+                            <input type="text" id="settingAppName" value="${this.settings.appName}" class="form-input">
+                        </div>
+                        <div>
+                            <label class="form-label">Tagline</label>
+                            <input type="text" id="settingTagline" value="${this.settings.tagline}" class="form-input">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">Contact Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Artist Name</label>
+                            <input type="text" id="settingArtistName" value="${this.settings.artistName}" class="form-input">
+                        </div>
+                        <div>
+                            <label class="form-label">WhatsApp Number</label>
+                            <input type="text" id="settingWhatsapp" value="${this.settings.whatsapp}" class="form-input">
+                        </div>
+                        <div>
+                            <label class="form-label">Email</label>
+                            <input type="email" id="settingEmail" value="${this.settings.email}" class="form-input">
+                        </div>
+                        <div>
+                            <label class="form-label">Address</label>
+                            <input type="text" id="settingAddress" value="${this.settings.contactAddress}" class="form-input">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">Media Links (Google Drive URLs)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="form-label">Logo URL</label>
+                            <input type="url" id="settingLogo" value="${this.settings.logo}" class="form-input">
+                        </div>
+                        <div>
+                            <label class="form-label">Instagram QR Code URL</label>
+                            <input type="url" id="settingInstagramQR" value="${this.settings.instagramQR}" class="form-input">
+                        </div>
+                        <div>
+                            <label class="form-label">YouTube QR Code URL</label>
+                            <input type="url" id="settingYoutubeQR" value="${this.settings.youtubeQR}" class="form-input">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button onclick="AdminDashboard.saveSettings()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold">
+                        💾 Save Settings
+                    </button>
+                </div>
+            </div>
+        `;
+    },
+
+    async saveSettings() {
+        try {
+            const updatedSettings = {
+                appName: document.getElementById('settingAppName').value,
+                tagline: document.getElementById('settingTagline').value,
+                artistName: document.getElementById('settingArtistName').value,
+                whatsapp: document.getElementById('settingWhatsapp').value,
+                email: document.getElementById('settingEmail').value,
+                contactAddress: document.getElementById('settingAddress').value,
+                logo: document.getElementById('settingLogo').value,
+                instagramQR: document.getElementById('settingInstagramQR').value,
+                youtubeQR: document.getElementById('settingYoutubeQR').value
+            };
+
+            await API.updateSettings(updatedSettings);
+            Utils.showToast('Settings saved successfully!', 'success');
+        } catch (error) {
+            Utils.showToast('Failed to save settings', 'error');
+        }
+    },
+
     updateStats() {
-        // Total students
-        const totalStudents = Object.keys(this.students).length;
-        document.getElementById('totalStudents').textContent = totalStudents;
-
-        // Active students
-        const activeStudents = Object.values(this.students).filter(s => 
-            s.active && !Utils.isDatePassed(s.expiry)
-        ).length;
-        document.getElementById('activeStudents').textContent = activeStudents;
-
-        // Total videos
-        document.getElementById('totalVideos').textContent = Object.keys(this.videos).length;
-
-        // Total views
-        document.getElementById('totalViews').textContent = this.views.length;
+        document.getElementById('totalStudents').textContent = this.stats.totalStudents || 0;
+        document.getElementById('activeStudents').textContent = this.stats.activeStudents || 0;
+        document.getElementById('totalVideos').textContent = this.stats.totalVideos || 0;
+        document.getElementById('totalViews').textContent = this.stats.totalViews || 0;
     },
 
     displayStudents() {
         const tbody = document.getElementById('studentsTableBody');
         tbody.innerHTML = '';
 
-        if (Object.keys(this.students).length === 0) {
+        if (this.students.length === 0) {
             tbody.innerHTML = `
                 <tr>
                     <td colspan="6" class="px-6 py-8 text-center text-gray-500">
@@ -69,7 +157,7 @@ const AdminDashboard = {
             return;
         }
 
-        Object.entries(this.students).forEach(([username, student]) => {
+        this.students.forEach(student => {
             const row = document.createElement('tr');
             const isExpired = Utils.isDatePassed(student.expiry);
             const status = !student.active ? 'inactive' : isExpired ? 'expired' : 'active';
@@ -80,7 +168,7 @@ const AdminDashboard = {
                     <div class="text-sm text-gray-500">${student.email || '-'}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                    <code class="text-sm bg-gray-100 px-2 py-1 rounded">${username}</code>
+                    <code class="text-sm bg-gray-100 px-2 py-1 rounded">${student.username}</code>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <span class="badge badge-info">${CONFIG.COURSES[student.course]?.name || student.course}</span>
@@ -94,19 +182,19 @@ const AdminDashboard = {
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                     <button 
-                        onclick="editStudent('${username}')"
+                        onclick="editStudent('${student.username}')"
                         class="action-btn action-btn-edit"
                     >
                         ✏️ Edit
                     </button>
                     <button 
-                        onclick="toggleStudent('${username}')"
+                        onclick="toggleStudent('${student.username}')"
                         class="action-btn action-btn-toggle"
                     >
                         ${student.active ? '⏸️ Disable' : '▶️ Enable'}
                     </button>
                     <button 
-                        onclick="deleteStudent('${username}')"
+                        onclick="deleteStudent('${student.username}')"
                         class="action-btn action-btn-delete"
                     >
                         🗑️ Delete
@@ -121,7 +209,7 @@ const AdminDashboard = {
         const grid = document.getElementById('videosGrid');
         grid.innerHTML = '';
 
-        if (Object.keys(this.videos).length === 0) {
+        if (this.videos.length === 0) {
             grid.innerHTML = `
                 <div class="col-span-full text-center py-12 text-gray-500">
                     <p class="text-xl mb-4">No videos found</p>
@@ -133,11 +221,9 @@ const AdminDashboard = {
             return;
         }
 
-        Object.entries(this.videos).forEach(([id, video]) => {
+        this.videos.forEach(video => {
             const card = document.createElement('div');
             card.className = 'video-card';
-            
-            const views = this.views.filter(v => v.videoId === id).length;
             
             card.innerHTML = `
                 <img src="${video.thumbnail}" alt="${video.title}" class="video-card-thumbnail">
@@ -150,17 +236,17 @@ const AdminDashboard = {
                     <p class="text-sm text-gray-600 mb-3">${video.description.substring(0, 80)}...</p>
                     <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
                         <span>📅 ${Utils.formatDate(video.unlockDate)}</span>
-                        <span>👁️ ${views} views</span>
+                        <span>👁️ ${video.viewed || 0} views</span>
                     </div>
                     <div class="flex space-x-2">
                         <button 
-                            onclick="editVideo('${id}')"
+                            onclick="editVideo('${video._id}')"
                             class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded font-semibold text-sm transition-all"
                         >
                             ✏️ Edit
                         </button>
                         <button 
-                            onclick="deleteVideo('${id}')"
+                            onclick="deleteVideo('${video._id}')"
                             class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-3 rounded font-semibold text-sm transition-all"
                         >
                             🗑️ Delete
@@ -172,82 +258,61 @@ const AdminDashboard = {
         });
     },
 
-    loadAnalytics() {
-        // Recent Logins
-        const loginsList = document.getElementById('recentLoginsList');
-        const recentLogins = this.sessions.slice(-10).reverse();
+    async loadAnalytics() {
+        try {
+            const logins = await API.getAnalytics('logins');
+            const views = await API.getAnalytics('views');
 
-        if (recentLogins.length === 0) {
-            loginsList.innerHTML = '<p class="text-gray-500 text-sm">No login activity yet</p>';
-            return;
-        }
-
-        loginsList.innerHTML = recentLogins.map(session => `
-            <div class="activity-item">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="font-semibold text-sm">${session.username}</p>
-                        <p class="text-xs text-gray-500">${session.role} • ${session.device}</p>
-                    </div>
-                    <div class="text-xs text-gray-500">
-                        ${Utils.formatDateTime(session.timestamp)}
-                    </div>
-                </div>
-            </div>
-        `).join('');
-
-        // Recent Views
-        const viewsList = document.getElementById('recentViewsList');
-        const recentViews = this.views.slice(-10).reverse();
-
-        if (recentViews.length === 0) {
-            viewsList.innerHTML = '<p class="text-gray-500 text-sm">No video views yet</p>';
-            return;
-        }
-
-        viewsList.innerHTML = recentViews.map(view => {
-            const video = this.videos[view.videoId];
-            return `
-                <div class="activity-item">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="font-semibold text-sm">${video?.title || 'Unknown Video'}</p>
-                            <p class="text-xs text-gray-500">${view.username} • ${view.device}</p>
-                        </div>
-                        <div class="text-xs text-gray-500">
-                            ${Utils.formatDateTime(view.timestamp)}
+            // Display recent logins
+            const loginsList = document.getElementById('recentLoginsList');
+            if (logins.length === 0) {
+                loginsList.innerHTML = '<p class="text-gray-500 text-sm">No login activity yet</p>';
+            } else {
+                loginsList.innerHTML = logins.map(session => `
+                    <div class="activity-item">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-semibold text-sm">${session.username}</p>
+                                <p class="text-xs text-gray-500">${session.role} • ${session.device}</p>
+                            </div>
+                            <div class="text-xs text-gray-500">
+                                ${Utils.formatDateTime(session.timestamp)}
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-        }).join('');
-    },
+                `).join('');
+            }
 
-    loadSettings() {
-        document.getElementById('appVersion').textContent = CONFIG.VERSION;
-        document.getElementById('lastUpdated').textContent = new Date().toLocaleDateString();
+            // Display recent views
+            const viewsList = document.getElementById('recentViewsList');
+            if (views.length === 0) {
+                viewsList.innerHTML = '<p class="text-gray-500 text-sm">No video views yet</p>';
+            } else {
+                viewsList.innerHTML = views.map(view => {
+                    const video = this.videos.find(v => v._id === view.videoId);
+                    return `
+                        <div class="activity-item">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-semibold text-sm">${video?.title || 'Unknown Video'}</p>
+                                    <p class="text-xs text-gray-500">${view.username} • ${view.device}</p>
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    ${Utils.formatDateTime(view.timestamp)}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        } catch (error) {
+            console.error('Error loading analytics:', error);
+        }
     }
 };
 
-// Tab Switching
-function switchTab(tab) {
-    // Hide all tabs
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.add('hidden');
-    });
-
-    // Remove active class from all buttons
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-
-    // Show selected tab
-    document.getElementById(`${tab}Tab`).classList.remove('hidden');
-    document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
-}
-
 // Student Management Functions
-function showAddStudentModal() {
+async function showAddStudentModal() {
     const modal = createModal('Add New Student', `
         <form id="addStudentForm" class="space-y-4">
             <div class="form-group">
@@ -275,7 +340,7 @@ function showAddStudentModal() {
                 <select name="course" class="form-select" required>
                     <option value="BASIC">Basic Course (1 month)</option>
                     <option value="INTERMEDIATE">Intermediate Course (2 months)</option>
-                    <option value="ADVANCED">Advanced Course (3 months)</option>
+                    <option value="PROFESSIONAL">Professional Course (3 months)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -293,46 +358,119 @@ function showAddStudentModal() {
         </form>
     `);
 
-    document.getElementById('addStudentForm').addEventListener('submit', (e) => {
+    document.getElementById('addStudentForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const studentData = Object.fromEntries(formData);
         
-        // Add to students object
-        AdminDashboard.students[studentData.username] = {
-            ...studentData,
-            active: true,
-            joinDate: new Date().toISOString().split('T')[0],
-            videosWatched: [],
-            progress: 0
-        };
-
-        Utils.showToast('Student added! (Note: Changes are stored locally in GitHub mode)', 'success');
-        AdminDashboard.displayStudents();
-        AdminDashboard.updateStats();
-        closeModal();
+        try {
+            await API.createStudent(studentData);
+            Utils.showToast('Student added successfully!', 'success');
+            await AdminDashboard.loadAllData();
+            AdminDashboard.displayStudents();
+            AdminDashboard.updateStats();
+            closeModal();
+        } catch (error) {
+            Utils.showToast(error.message, 'error');
+        }
     });
 }
 
-function editStudent(username) {
-    const student = AdminDashboard.students[username];
-    // Implementation similar to addStudent but with existing data
-    Utils.showToast('Edit feature - update data in users.json file', 'info');
+async function editStudent(username) {
+    const student = AdminDashboard.students.find(s => s.username === username);
+    if (!student) return;
+
+    const modal = createModal('Edit Student', `
+        <form id="editStudentForm" class="space-y-4">
+            <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input type="text" name="name" value="${student.name}" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" value="${student.email || ''}" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="tel" name="phone" value="${student.phone || ''}" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Course *</label>
+                <select name="course" class="form-select" required>
+                    <option value="BASIC" ${student.course === 'BASIC' ? 'selected' : ''}>Basic Course (1 month)</option>
+                    <option value="INTERMEDIATE" ${student.course === 'INTERMEDIATE' ? 'selected' : ''}>Intermediate Course (2 months)</option>
+                    <option value="PROFESSIONAL" ${student.course === 'PROFESSIONAL' ? 'selected' : ''}>Professional Course (3 months)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Expiry Date *</label>
+                <input type="date" name="expiry" value="${student.expiry}" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">New Password (leave blank to keep current)</label>
+                <input type="text" name="password" class="form-input" placeholder="Enter new password">
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeModal()" class="px-6 py-2 bg-gray-300 rounded-lg font-semibold hover:bg-gray-400">
+                    Cancel
+                </button>
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+                    Update Student
+                </button>
+            </div>
+        </form>
+    `);
+
+    document.getElementById('editStudentForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const updates = Object.fromEntries(formData);
+        
+        // Remove password if empty
+        if (!updates.password) {
+            delete updates.password;
+        }
+        
+        try {
+            await API.updateStudent(username, updates);
+            Utils.showToast('Student updated successfully!', 'success');
+            await AdminDashboard.loadAllData();
+            AdminDashboard.displayStudents();
+            closeModal();
+        } catch (error) {
+            Utils.showToast(error.message, 'error');
+        }
+    });
 }
 
-function toggleStudent(username) {
-    AdminDashboard.students[username].active = !AdminDashboard.students[username].active;
-    Utils.showToast(`Student ${AdminDashboard.students[username].active ? 'enabled' : 'disabled'}`, 'success');
-    AdminDashboard.displayStudents();
-    AdminDashboard.updateStats();
-}
+async function toggleStudent(username) {
+    const student = AdminDashboard.students.find(s => s.username === username);
+    if (!student) return;
 
-function deleteStudent(username) {
-    if (confirm(`Are you sure you want to delete ${AdminDashboard.students[username].name}?`)) {
-        delete AdminDashboard.students[username];
-        Utils.showToast('Student deleted', 'success');
+    try {
+        await API.updateStudent(username, { active: !student.active });
+        Utils.showToast(`Student ${!student.active ? 'enabled' : 'disabled'}`, 'success');
+        await AdminDashboard.loadAllData();
         AdminDashboard.displayStudents();
-        AdminDashboard.updateStats();
+    } catch (error) {
+        Utils.showToast('Failed to toggle student status', 'error');
+    }
+}
+
+async function deleteStudent(username) {
+    const student = AdminDashboard.students.find(s => s.username === username);
+    if (!student) return;
+
+    if (confirm(`Are you sure you want to delete ${student.name}? This action cannot be undone.`)) {
+        try {
+            await API.deleteStudent(username);
+            Utils.showToast('Student deleted successfully', 'success');
+            await AdminDashboard.loadAllData();
+            AdminDashboard.displayStudents();
+            AdminDashboard.updateStats();
+        } catch (error) {
+            Utils.showToast('Failed to delete student', 'error');
+        }
     }
 }
 
@@ -381,8 +519,13 @@ function showAddVideoModal() {
                 <select name="course" class="form-select" required>
                     <option value="BASIC">Basic</option>
                     <option value="INTERMEDIATE">Intermediate</option>
-                    <option value="ADVANCED">Advanced</option>
+                    <option value="PROFESSIONAL">Professional</option>
                 </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Thumbnail URL</label>
+                <input type="url" name="thumbnail" class="form-input" placeholder="https://drive.google.com/...">
+                <p class="text-xs text-gray-500 mt-1">Optional: Upload thumbnail to Google Drive</p>
             </div>
             <div class="form-group">
                 <label class="form-label">Notes (Optional)</label>
@@ -399,37 +542,133 @@ function showAddVideoModal() {
         </form>
     `);
 
-    document.getElementById('addVideoForm').addEventListener('submit', (e) => {
+    document.getElementById('addVideoForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const videoData = Object.fromEntries(formData);
         
-        const videoId = `week${videoData.week}_video_${Utils.generateId()}`;
+        // Generate ID
+        videoData._id = `week${videoData.week}_video_${Utils.generateId()}`;
+        videoData.week = parseInt(videoData.week);
         
-        AdminDashboard.videos[videoId] = {
-            ...videoData,
-            week: parseInt(videoData.week),
-            thumbnail: `https://via.placeholder.com/640x360/667eea/ffffff?text=Week+${videoData.week}`,
-            viewed: 0
-        };
+        // Default thumbnail if not provided
+        if (!videoData.thumbnail) {
+            videoData.thumbnail = `https://via.placeholder.com/640x360/8b5cf6/ffffff?text=Week+${videoData.week}`;
+        }
 
-        Utils.showToast('Video added! (Note: Changes are stored locally in GitHub mode)', 'success');
-        AdminDashboard.displayVideos();
-        AdminDashboard.updateStats();
-        closeModal();
+        try {
+            await API.createVideo(videoData);
+            Utils.showToast('Video added successfully!', 'success');
+            await AdminDashboard.loadAllData();
+            AdminDashboard.displayVideos();
+            AdminDashboard.updateStats();
+            closeModal();
+        } catch (error) {
+            Utils.showToast(error.message, 'error');
+        }
     });
 }
 
 function editVideo(videoId) {
-    Utils.showToast('Edit feature - update data in videos.json file', 'info');
+    const video = AdminDashboard.videos.find(v => v._id === videoId);
+    if (!video) return;
+
+    const modal = createModal('Edit Video', `
+        <form id="editVideoForm" class="space-y-4">
+            <div class="form-group">
+                <label class="form-label">Video Title *</label>
+                <input type="text" name="title" value="${video.title}" class="form-input" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description *</label>
+                <textarea name="description" class="form-input" rows="3" required>${video.description}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Google Drive Link *</label>
+                <input type="url" name="driveLink" value="${video.driveLink}" class="form-input" required>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="form-group">
+                    <label class="form-label">Week *</label>
+                    <input type="number" name="week" value="${video.week}" class="form-input" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Day *</label>
+                    <select name="day" class="form-select" required>
+                        <option value="Monday" ${video.day === 'Monday' ? 'selected' : ''}>Monday</option>
+                        <option value="Thursday" ${video.day === 'Thursday' ? 'selected' : ''}>Thursday</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="form-group">
+                    <label class="form-label">Unlock Date *</label>
+                    <input type="date" name="unlockDate" value="${video.unlockDate}" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Duration *</label>
+                    <input type="text" name="duration" value="${video.duration}" class="form-input" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Course Level *</label>
+                <select name="course" class="form-select" required>
+                    <option value="BASIC" ${video.course === 'BASIC' ? 'selected' : ''}>Basic</option>
+                    <option value="INTERMEDIATE" ${video.course === 'INTERMEDIATE' ? 'selected' : ''}>Intermediate</option>
+                    <option value="PROFESSIONAL" ${video.course === 'PROFESSIONAL' ? 'selected' : ''}>Professional</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Thumbnail URL</label>
+                <input type="url" name="thumbnail" value="${video.thumbnail}" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <textarea name="notes" class="form-input" rows="2">${video.notes || ''}</textarea>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeModal()" class="px-6 py-2 bg-gray-300 rounded-lg font-semibold hover:bg-gray-400">
+                    Cancel
+                </button>
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+                    Update Video
+                </button>
+            </div>
+        </form>
+    `);
+
+    document.getElementById('editVideoForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const updates = Object.fromEntries(formData);
+        updates.week = parseInt(updates.week);
+
+        try {
+            await API.call(CONFIG.API.ENDPOINTS.VIDEOS, 'PUT', { videoId, updates });
+            Utils.showToast('Video updated successfully!', 'success');
+            await AdminDashboard.loadAllData();
+            AdminDashboard.displayVideos();
+            closeModal();
+        } catch (error) {
+            Utils.showToast(error.message, 'error');
+        }
+    });
 }
 
-function deleteVideo(videoId) {
-    if (confirm('Are you sure you want to delete this video?')) {
-        delete AdminDashboard.videos[videoId];
-        Utils.showToast('Video deleted', 'success');
-        AdminDashboard.displayVideos();
-        AdminDashboard.updateStats();
+async function deleteVideo(videoId) {
+    const video = AdminDashboard.videos.find(v => v._id === videoId);
+    if (!video) return;
+
+    if (confirm(`Are you sure you want to delete "${video.title}"? This action cannot be undone.`)) {
+        try {
+            await API.call(CONFIG.API.ENDPOINTS.VIDEOS, 'DELETE', { videoId });
+            Utils.showToast('Video deleted successfully', 'success');
+            await AdminDashboard.loadAllData();
+            AdminDashboard.displayVideos();
+            AdminDashboard.updateStats();
+        } catch (error) {
+            Utils.showToast('Failed to delete video', 'error');
+        }
     }
 }
 
@@ -445,7 +684,7 @@ function exportData() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `mehandi-portal-backup-${Date.now()}.json`;
+    a.download = `craftdreamzzz-backup-${Date.now()}.json`;
     a.click();
     
     Utils.showToast('Data exported successfully', 'success');
@@ -482,4 +721,18 @@ function closeModal() {
     if (modal) {
         modal.remove();
     }
+}
+
+// Tab Switching
+function switchTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    document.getElementById(`${tab}Tab`).classList.remove('hidden');
+    document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
 }

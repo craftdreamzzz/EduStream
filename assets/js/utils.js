@@ -1,5 +1,77 @@
 // Utility Functions
 
+// API Helper Functions
+const API = {
+    async call(endpoint, method = 'GET', data = null) {
+        try {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            if (data && method !== 'GET') {
+                options.body = JSON.stringify(data);
+            }
+
+            const response = await fetch(`${CONFIG.API.BASE_URL}${endpoint}`, options);
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'API request failed');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('API Error:', error);
+            throw error;
+        }
+    },
+
+    // Specific API calls
+    async getSettings() {
+        return await this.call(CONFIG.API.ENDPOINTS.SETTINGS);
+    },
+
+    async updateSettings(settings) {
+        return await this.call(CONFIG.API.ENDPOINTS.SETTINGS, 'PUT', settings);
+    },
+
+    async getStudents() {
+        return await this.call(CONFIG.API.ENDPOINTS.STUDENTS);
+    },
+
+    async createStudent(studentData) {
+        return await this.call(CONFIG.API.ENDPOINTS.STUDENTS, 'POST', studentData);
+    },
+
+    async updateStudent(username, updates) {
+        return await this.call(CONFIG.API.ENDPOINTS.STUDENTS, 'PUT', { username, updates });
+    },
+
+    async deleteStudent(username) {
+        return await this.call(CONFIG.API.ENDPOINTS.STUDENTS, 'DELETE', { username });
+    },
+
+    async getVideos(course = null) {
+        const url = course ? `${CONFIG.API.ENDPOINTS.VIDEOS}?course=${course}` : CONFIG.API.ENDPOINTS.VIDEOS;
+        return await this.call(url);
+    },
+
+    async createVideo(videoData) {
+        return await this.call(CONFIG.API.ENDPOINTS.VIDEOS, 'POST', videoData);
+    },
+
+    async getAnalytics(type) {
+        return await this.call(`${CONFIG.API.ENDPOINTS.ANALYTICS}?type=${type}`);
+    },
+
+    async trackActivity(type, data) {
+        return await this.call(CONFIG.API.ENDPOINTS.ANALYTICS, 'POST', { type, data });
+    }
+};
+
 const Utils = {
     // Date & Time Functions
     formatDate(dateString) {

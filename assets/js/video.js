@@ -3,14 +3,13 @@
 const VideoPlayer = {
     async loadVideo(videoId) {
         try {
-            // Load all videos
-            const videos = await Utils.loadJSON('../data/videos.json');
+            // Load video from API
+            const videos = await API.getVideos();
+            const video = videos.find(v => v._id === videoId);
             
-            if (!videos || !videos[videoId]) {
+            if (!video) {
                 throw new Error('Video not found');
             }
-
-            const video = videos[videoId];
             
             // Display video info
             document.getElementById('videoTitle').textContent = video.title;
@@ -28,7 +27,7 @@ const VideoPlayer = {
             // Embed video player
             this.embedVideo(video.driveLink);
 
-            return { id: videoId, ...video };
+            return video;
 
         } catch (error) {
             console.error('Error loading video:', error);
@@ -69,22 +68,11 @@ const VideoPlayer = {
 
     async markAsWatched(videoId, username) {
         try {
-            // In GitHub mode, store in localStorage
-            // In AWS mode, POST to backend API
-            
-            const watchedVideos = Utils.getStorage('watched_videos') || {};
-            
-            if (!watchedVideos[username]) {
-                watchedVideos[username] = [];
-            }
-
-            if (!watchedVideos[username].includes(videoId)) {
-                watchedVideos[username].push(videoId);
-                Utils.setStorage('watched_videos', watchedVideos);
-            }
-
-            // Log watch completion
-            this.logWatchCompletion(videoId, username);
+            await API.trackActivity('video_completion', {
+                videoId,
+                username,
+                completedAt: new Date().toISOString()
+            });
 
             return true;
 

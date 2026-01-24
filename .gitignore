@@ -34,3 +34,10 @@ coverage/
 
 # Don't ignore data files (we need them for GitHub Pages)
 !data/*.json
+
+node_modules/
+.env
+.env.local
+.vercel
+*.log
+.DS_Store

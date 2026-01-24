@@ -5,15 +5,18 @@ const StudentDashboard = {
     allVideos: [],
     userVideos: [],
     currentFilter: 'all',
+    settings: null,
 
     async init(user) {
         this.currentUser = user;
         
+        // Load settings first
+        await this.loadSettings();
+        
         // Update welcome message
         document.getElementById('welcomeText').textContent = `Welcome, ${user.name}!`;
         
-        // Load user data and videos
-        await this.loadUserData();
+        // Load videos
         await this.loadVideos();
         
         // Update dashboard
@@ -21,38 +24,31 @@ const StudentDashboard = {
         this.displayVideos();
     },
 
-    async loadUserData() {
+    async loadSettings() {
         try {
-            const users = await Utils.loadJSON('../data/users.json');
-            const userData = users[this.currentUser.username];
-            
-            if (userData) {
-                this.currentUser = { ...this.currentUser, ...userData };
-            }
+            this.settings = await API.getSettings();
         } catch (error) {
-            console.error('Error loading user data:', error);
+            console.error('Error loading settings:', error);
         }
     },
 
     async loadVideos() {
         try {
-            const allVideos = await Utils.loadJSON('../data/videos.json');
+            const allVideos = await API.getVideos();
             
-            if (!allVideos) {
+            if (!allVideos || allVideos.length === 0) {
                 console.error('No videos found');
                 return;
             }
 
             // Filter videos for user's course
-            this.userVideos = Object.entries(allVideos)
-                .filter(([id, video]) => {
-                    // Show all videos for user's course level and below
+            this.userVideos = allVideos
+                .filter(video => {
                     const courseLevel = this.getCourseLevel(this.currentUser.course);
                     const videoLevel = this.getCourseLevel(video.course);
                     return videoLevel <= courseLevel;
                 })
-                .map(([id, video]) => ({
-                    id,
+                .map(video => ({
                     ...video,
                     isUnlocked: this.isVideoUnlocked(video)
                 }))
@@ -67,7 +63,7 @@ const StudentDashboard = {
     },
 
     getCourseLevel(course) {
-        const levels = { 'BASIC': 1, 'INTERMEDIATE': 2, 'ADVANCED': 3 };
+        const levels = { 'BASIC': 1, 'INTERMEDIATE': 2, 'PROFESSIONAL': 3 };
         return levels[course] || 0;
     },
 
@@ -137,10 +133,8 @@ const StudentDashboard = {
         const skeleton = document.getElementById('videosSkeleton');
         const noVideos = document.getElementById('noVideosMessage');
 
-        // Hide skeleton
         skeleton.classList.add('hidden');
 
-        // Filter videos
         let videosToShow = this.allVideos;
         if (this.currentFilter === 'unlocked') {
             videosToShow = this.allVideos.filter(v => v.isUnlocked);
@@ -170,7 +164,7 @@ const StudentDashboard = {
         card.setAttribute('data-aos', 'fade-up');
         card.setAttribute('data-aos-delay', (index * 50).toString());
 
-        const isWatched = this.currentUser.videosWatched?.includes(video.id);
+        const isWatched = this.currentUser.videosWatched?.includes(video._id);
         
         card.innerHTML = `
             <div class="flex flex-col md:flex-row gap-4">
@@ -218,7 +212,7 @@ const StudentDashboard = {
                 <div class="flex items-center md:w-32 flex-shrink-0">
                     ${video.isUnlocked ? `
                         <button 
-                            onclick="StudentDashboard.watchVideo('${video.id}')"
+                            onclick="StudentDashboard.watchVideo('${video._id}')"
                             class="w-full bg-gradient-to-r from-purple-600 to-purple-800 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                         >
                             ${isWatched ? '▶️ Rewatch' : '▶️ Watch Now'}
@@ -239,7 +233,6 @@ const StudentDashboard = {
     },
 
     watchVideo(videoId) {
-        // Navigate to video player
         window.location.href = `./player.html?video=${videoId}`;
     },
 
@@ -254,7 +247,7 @@ const StudentDashboard = {
                     You've completed all videos in the <strong>${CONFIG.COURSES[this.currentUser.course].name}</strong>!
                 </p>
                 <div class="bg-gradient-to-r from-purple-100 to-purple-50 rounded-lg p-4 mb-6">
-                    <p class="text-purple-800 font-semibold">Keep up the great work!</p>
+                    <p class="text-purple-800 font-semibold">Keep up the great work! 🎨✨</p>
                 </div>
                 <button 
                     onclick="this.closest('.fixed').remove()"
@@ -272,7 +265,6 @@ const StudentDashboard = {
 function filterVideos(filter) {
     StudentDashboard.currentFilter = filter;
     
-    // Update button states
     const buttons = {
         all: document.getElementById('btnAll'),
         unlocked: document.getElementById('btnUnlocked'),
