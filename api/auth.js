@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
       const adminUser = process.env.ADMIN_USERNAME;
       const adminPass = process.env.ADMIN_PASSWORD;
 
-      if (username === adminUser && await bcrypt.compare(password, adminPass)) {
+      if (username === adminUser && password === adminPass) {
         res.status(200).json({
           success: true,
           user: { username, role: 'admin' },
