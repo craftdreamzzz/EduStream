@@ -1,0 +1,41 @@
+{
+  "demo_student": {
+    "password": "demo123",
+    "name": "Demo Student",
+    "course": "BASIC",
+    "expiry": "2025-07-21",
+    "active": true,
+    "joinDate": "2025-01-21",
+    "email": "demo@example.com",
+    "phone": "9876543210",
+    "videosWatched": [],
+    "lastLogin": null,
+    "progress": 0
+  },
+  "ramesh_kumar": {
+    "password": "ramesh@123",
+    "name": "Ramesh Kumar",
+    "course": "INTERMEDIATE",
+    "expiry": "2025-08-21",
+    "active": true,
+    "joinDate": "2025-01-15",
+    "email": "ramesh@example.com",
+    "phone": "9123456789",
+    "videosWatched": ["week1_video1"],
+    "lastLogin": "2025-01-20T10:30:00Z",
+    "progress": 12
+  },
+  "suresh_patel": {
+    "password": "suresh@456",
+    "name": "Suresh Patel",
+    "course": "ADVANCED",
+    "expiry": "2025-10-21",
+    "active": true,
+    "joinDate": "2025-01-10",
+    "email": "suresh@example.com",
+    "phone": "9988776655",
+    "videosWatched": ["week1_video1", "week1_video2"],
+    "lastLogin": "2025-01-19T15:45:00Z",
+    "progress": 25
+  }
+}

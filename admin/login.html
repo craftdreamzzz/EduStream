@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Mehandi Learning Portal</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-red-600 via-red-700 to-red-900 flex items-center justify-center p-4">
+    
+    <div class="w-full max-w-md">
+        
+        <!-- Logo -->
+        <div class="text-center mb-8" data-aos="fade-down">
+            <div class="text-6xl mb-4">🛡️</div>
+            <h1 class="text-4xl font-bold text-white mb-2">Admin Portal</h1>
+            <p class="text-white text-opacity-90">Restricted Access Only</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="bg-white rounded-2xl shadow-2xl p-8" data-aos="fade-up" data-aos-delay="200">
+            
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Admin Login</h2>
+
+            <form id="adminLoginForm" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Username</label>
+                    <input 
+                        type="text" 
+                        id="adminUsername" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                        placeholder="Enter admin username"
+                        required
+                        autocomplete="username"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">Password</label>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            id="adminPassword" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                            placeholder="Enter admin password"
+                            required
+                            autocomplete="current-password"
+                        >
+                        <button 
+                            type="button" 
+                            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            onclick="togglePassword()"
+                        >
+                            👁️
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
+                    <p class="text-xs text-yellow-700">
+                        ⚠️ Unauthorized access is strictly prohibited and will be logged.
+                    </p>
+                </div>
+
+                <button 
+                    type="submit" 
+                    class="w-full bg-gradient-to-r from-red-600 to-red-800 text-white py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                >
+                    Access Admin Panel
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <a href="../index.html" class="text-sm text-gray-500 hover:text-gray-700">
+                    ← Back to Student Login
+                </a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-6 text-white text-opacity-80 text-sm">
+            <p>© 2026 Mehandi Learning Portal - Admin Access</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="../assets/js/config.js"></script>
+    <script src="../assets/js/utils.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    
+    <script>
+        AOS.init({ duration: 800, once: true });
+
+        function togglePassword() {
+            const input = document.getElementById('adminPassword');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('adminUsername').value.trim();
+            const password = document.getElementById('adminPassword').value;
+            
+            await Auth.loginAdmin(username, password);
+        });
+
+        // Check if already logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            if (Auth.checkSession() && Auth.isAdmin) {
+                window.location.href = './index.html';
+            }
+        });
+
+        // Log access attempts
+        const accessAttempt = {
+            timestamp: new Date().toISOString(),
+            page: 'admin-login',
+            userAgent: navigator.userAgent
+        };
+        console.log('Admin login page accessed:', accessAttempt);
+    </script>
+</body>
+</html>

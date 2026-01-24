@@ -1,0 +1,266 @@
+/* Admin Dashboard Styles */
+
+/* Tab Buttons */
+.tab-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    color: #6b7280;
+    background: transparent;
+}
+
+.tab-btn:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.tab-btn.active {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.3);
+}
+
+/* Tab Content */
+.tab-content {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Table Styles */
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+tbody tr {
+    transition: all 0.2s ease;
+}
+
+tbody tr:hover {
+    background: #f9fafb;
+}
+
+/* Status Badges */
+.status-active {
+    background: #10b981;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-inactive {
+    background: #ef4444;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-expired {
+    background: #f59e0b;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Action Buttons */
+.action-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.action-btn-edit {
+    background: #3b82f6;
+    color: white;
+}
+
+.action-btn-edit:hover {
+    background: #2563eb;
+}
+
+.action-btn-delete {
+    background: #ef4444;
+    color: white;
+}
+
+.action-btn-delete:hover {
+    background: #dc2626;
+}
+
+.action-btn-toggle {
+    background: #f59e0b;
+    color: white;
+}
+
+.action-btn-toggle:hover {
+    background: #d97706;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #dc2626;
+    ring: 2px;
+    ring-color: rgba(220, 38, 38, 0.2);
+}
+
+.form-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: #dc2626;
+}
+
+/* Video Card Styles */
+.video-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.video-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.video-card-thumbnail {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+/* Stats Card */
+.stats-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+}
+
+/* Activity Log */
+.activity-item {
+    padding: 0.75rem;
+    border-left: 3px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+
+.activity-item:hover {
+    background: #f9fafb;
+    border-left-color: #dc2626;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tab-btn {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+    }
+
+    table {
+        font-size: 0.875rem;
+    }
+
+    .action-btn {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+}
+
+/* Loading States */
+.shimmer-loading {
+    background: linear-gradient(
+        90deg,
+        #f0f0f0 25%,
+        #e0e0e0 50%,
+        #f0f0f0 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -100% 0;
+    }
+    100% {
+        background-position: 100% 0;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .no-print,
+    nav,
+    .tab-btn,
+    .action-btn {
+        display: none !important;
+    }
+
+    .tab-content {
+        display: block !important;
+    }
+}

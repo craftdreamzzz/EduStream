@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player - Mehandi Learning Portal</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+    
+    <style>
+        body { background: #000; }
+        .video-wrapper {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    
+    <!-- Top Bar -->
+    <div class="bg-gray-900 text-white py-3 px-4">
+        <div class="video-wrapper flex items-center justify-between">
+            <button 
+                onclick="goBack()" 
+                class="flex items-center space-x-2 hover:text-purple-400 transition-colors"
+            >
+                <span class="text-xl">←</span>
+                <span class="font-semibold">Back to Dashboard</span>
+            </button>
+            <div class="flex items-center space-x-3">
+                <span class="text-sm text-gray-400" id="studentName">Loading...</span>
+                <button 
+                    onclick="logout()" 
+                    class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                >
+                    Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Player Section -->
+    <div class="flex-1 flex items-center justify-center p-4">
+        <div class="video-wrapper w-full">
+            
+            <!-- Video Title -->
+            <div class="text-white mb-4">
+                <h1 class="text-2xl md:text-3xl font-bold" id="videoTitle">Loading video...</h1>
+                <p class="text-gray-400 mt-2" id="videoDescription"></p>
+            </div>
+
+            <!-- Video Player -->
+            <div class="bg-black rounded-lg overflow-hidden shadow-2xl">
+                <div class="video-container" id="videoContainer">
+                    <div class="flex items-center justify-center h-full">
+                        <div class="text-center text-white">
+                            <div class="spinner mb-4"></div>
+                            <p>Loading video player...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Info -->
+            <div class="bg-gray-900 rounded-lg p-6 mt-6 text-white">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <p class="text-gray-400 text-sm">Week</p>
+                        <p class="font-semibold text-lg" id="videoWeek">--</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-sm">Duration</p>
+                        <p class="font-semibold text-lg" id="videoDuration">--</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-sm">Day</p>
+                        <p class="font-semibold text-lg" id="videoDay">--</p>
+                    </div>
+                </div>
+
+                <!-- Notes Section -->
+                <div id="notesSection" class="bg-yellow-900 bg-opacity-30 border-l-4 border-yellow-500 p-4 rounded hidden">
+                    <h3 class="font-bold text-yellow-300 mb-2">📝 Important Notes</h3>
+                    <p class="text-yellow-100" id="videoNotes"></p>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex flex-wrap gap-4 mt-6">
+                <button 
+                    onclick="markAsWatched()"
+                    id="markWatchedBtn"
+                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105"
+                >
+                    ✓ Mark as Watched
+                </button>
+                <button 
+                    onclick="shareVideo()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all"
+                >
+                    📤 Share
+                </button>
+                <button 
+                    onclick="reportIssue()"
+                    class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-all"
+                >
+                    ⚠️ Report Issue
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Warning Overlay (Anti-piracy) -->
+    <div id="warningOverlay" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-900 text-white rounded-lg p-8 max-w-md mx-4 text-center">
+            <div class="text-6xl mb-4">⚠️</div>
+            <h2 class="text-2xl font-bold mb-4">Important Notice</h2>
+            <p class="mb-4">This content is protected and for your personal use only.</p>
+            <p class="text-gray-400 text-sm mb-6">
+                Recording, sharing, or distributing this video is strictly prohibited and may result in account termination.
+            </p>
+            <button 
+                onclick="dismissWarning()"
+                class="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-semibold"
+            >
+                I Understand
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../assets/js/config.js"></script>
+    <script src="../assets/js/utils.js"></script>
+    <script src="../assets/js/auth.js"></script>
+    <script src="../assets/js/video.js"></script>
+
+    <script>
+        let currentVideo = null;
+        let currentUser = null;
+
+        function goBack() {
+            window.location.href = './dashboard.html';
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                Auth.logout();
+            }
+        }
+
+        function dismissWarning() {
+            document.getElementById('warningOverlay').classList.add('hidden');
+        }
+
+        async function markAsWatched() {
+            if (!currentVideo || !currentUser) return;
+            
+            await VideoPlayer.markAsWatched(currentVideo.id, currentUser.username);
+            
+            const btn = document.getElementById('markWatchedBtn');
+            btn.textContent = '✓ Marked as Watched';
+            btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            btn.classList.add('bg-gray-600', 'cursor-not-allowed');
+            btn.disabled = true;
+            
+            Utils.triggerConfetti();
+            Utils.showToast('Great job! Video marked as watched', 'success');
+        }
+
+        function shareVideo() {
+            const shareText = `Check out this video: ${currentVideo?.title}`;
+            if (navigator.share) {
+                navigator.share({
+                    title: currentVideo?.title,
+                    text: shareText
+                });
+            } else {
+                Utils.copyToClipboard(shareText);
+            }
+        }
+
+        function reportIssue() {
+            const issue = prompt('Please describe the issue you encountered:');
+            if (issue) {
+                console.log('Issue reported:', issue);
+                Utils.showToast('Thank you! Issue has been reported.', 'success');
+                // In production, send to backend
+            }
+        }
+
+        // Initialize player
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            if (!Auth.requireAuth()) return;
+
+            currentUser = Auth.getCurrentUser();
+            document.getElementById('studentName').textContent = currentUser.name;
+
+            // Get video ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoId = urlParams.get('video');
+
+            if (!videoId) {
+                Utils.showToast('No video specified', 'error');
+                setTimeout(() => goBack(), 2000);
+                return;
+            }
+
+            // Load and play video
+            currentVideo = await VideoPlayer.loadVideo(videoId);
+            
+            if (!currentVideo) {
+                Utils.showToast('Video not found', 'error');
+                setTimeout(() => goBack(), 2000);
+                return;
+            }
+
+            // Show warning overlay
+            setTimeout(() => {
+                document.getElementById('warningOverlay').classList.remove('hidden');
+            }, 1000);
+
+            // Track video view
+            VideoPlayer.trackView(videoId, currentUser.username);
+        });
+
+        // Disable right-click and keyboard shortcuts for video protection
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'PrintScreen' || e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+                e.preventDefault();
+                Utils.showToast('This action is disabled', 'warning');
+            }
+        });
+    </script>
+</body>
+</html>
