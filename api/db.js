@@ -8,6 +8,10 @@ async function connectToDatabase() {
     return { client: cachedClient, db: cachedDb };
   }
 
+  if (!process.env.MONGODB_URI) {
+    throw new Error('MONGODB_URI environment variable is not defined');
+  }
+
   const client = await MongoClient.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
