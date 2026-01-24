@@ -6,7 +6,7 @@ A complete online learning platform for Henna Design training courses with video
 
 ### For Students
 
-- 🎨 **Henna Design Courses** - Basic, Intermediate, and Professional levels
+- 🎨 **Henna Design Courses** - Basic,Intermediate and Professional levels
 - 📱 **Mobile Friendly** - Works perfectly on all devices
 - 🎥 **Video Streaming** - Google Drive embedded video player
 - 📅 **Scheduled Content** - Videos unlock on Monday and Thursday
