@@ -127,7 +127,7 @@ const Auth = {
             Utils.showToast('Admin login successful!', 'success');
 
             setTimeout(() => {
-                window.location.href = './admin/index.html';
+                window.location.href = './index.html';
             }, 500);
 
             return true;
