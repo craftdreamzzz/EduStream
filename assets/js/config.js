@@ -7,24 +7,59 @@ const CONFIG = {
     COURSES: {
         BASIC: {
             name: 'Basic Course',
-            duration: 1, // months
+            duration: 1,
             color: '#10b981',
             icon: '🎨',
-            description: 'Foundation of Henna Art'
+            description: 'Foundation of Henna Art',
+            access: ['BASIC']
         },
         INTERMEDIATE: {
             name: 'Intermediate Course',
             duration: 2,
             color: '#3b82f6',
             icon: '✨',
-            description: 'Advanced Henna Techniques'
+            description: 'Advanced Henna Techniques',
+            access: ['INTERMEDIATE']
         },
         PROFESSIONAL: {
             name: 'Professional Course',
             duration: 3,
             color: '#8b5cf6',
             icon: '👑',
-            description: 'Master Henna Artist Level'
+            description: 'Master Henna Artist Level',
+            access: ['PROFESSIONAL']
+        },
+        BASIC_INTERMEDIATE: {
+            name: 'Basic + Intermediate',
+            duration: 3,
+            color: '#06b6d4',
+            icon: '🎨✨',
+            description: 'Foundation + Advanced Techniques',
+            access: ['BASIC', 'INTERMEDIATE']
+        },
+        BASIC_PROFESSIONAL: {
+            name: 'Basic + Professional',
+            duration: 4,
+            color: '#ec4899',
+            icon: '🎨👑',
+            description: 'Foundation + Master Level',
+            access: ['BASIC', 'PROFESSIONAL']
+        },
+        INTERMEDIATE_PROFESSIONAL: {
+            name: 'Intermediate + Professional',
+            duration: 5,
+            color: '#f59e0b',
+            icon: '✨👑',
+            description: 'Advanced + Master Level',
+            access: ['INTERMEDIATE', 'PROFESSIONAL']
+        },
+        ALL: {
+            name: 'All Courses (Complete Package)',
+            duration: 6,
+            color: '#ef4444',
+            icon: '🎨✨👑',
+            description: 'Basic + Intermediate + Professional',
+            access: ['BASIC', 'INTERMEDIATE', 'PROFESSIONAL']
         }
     },
     

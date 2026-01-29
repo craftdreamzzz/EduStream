@@ -44,9 +44,10 @@ const StudentDashboard = {
             // Filter videos for user's course
             this.userVideos = allVideos
                 .filter(video => {
-                    const courseLevel = this.getCourseLevel(this.currentUser.course);
-                    const videoLevel = this.getCourseLevel(video.course);
-                    return videoLevel <= courseLevel;
+                    // Get student's access levels from their enrolled course
+                    const studentAccess = CONFIG.COURSES[this.currentUser.course]?.access || [];
+                    // Check if student has access to this video's course level
+                    return studentAccess.includes(video.course);
                 })
                 .map(video => ({
                     ...video,
@@ -60,11 +61,6 @@ const StudentDashboard = {
             console.error('Error loading videos:', error);
             this.userVideos = [];
         }
-    },
-
-    getCourseLevel(course) {
-        const levels = { 'BASIC': 1, 'INTERMEDIATE': 2, 'PROFESSIONAL': 3 };
-        return levels[course] || 0;
     },
 
     isVideoUnlocked(video) {

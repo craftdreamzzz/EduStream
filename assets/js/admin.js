@@ -341,6 +341,10 @@ async function showAddStudentModal() {
                     <option value="BASIC">Basic Course (1 month)</option>
                     <option value="INTERMEDIATE">Intermediate Course (2 months)</option>
                     <option value="PROFESSIONAL">Professional Course (3 months)</option>
+                    <option value="BASIC_INTERMEDIATE">Basic + Intermediate (3 months)</option>
+                    <option value="BASIC_PROFESSIONAL">Basic + Professional (4 months)</option>
+                    <option value="INTERMEDIATE_PROFESSIONAL">Intermediate + Professional (5 months)</option>
+                    <option value="ALL">All Courses - Complete Package (6 months)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -395,11 +399,14 @@ async function editStudent(username) {
                 <input type="tel" name="phone" value="${student.phone || ''}" class="form-input">
             </div>
             <div class="form-group">
-                <label class="form-label">Course *</label>
                 <select name="course" class="form-select" required>
                     <option value="BASIC" ${student.course === 'BASIC' ? 'selected' : ''}>Basic Course (1 month)</option>
                     <option value="INTERMEDIATE" ${student.course === 'INTERMEDIATE' ? 'selected' : ''}>Intermediate Course (2 months)</option>
                     <option value="PROFESSIONAL" ${student.course === 'PROFESSIONAL' ? 'selected' : ''}>Professional Course (3 months)</option>
+                    <option value="BASIC_INTERMEDIATE" ${student.course === 'BASIC_INTERMEDIATE' ? 'selected' : ''}>Basic + Intermediate (3 months)</option>
+                    <option value="BASIC_PROFESSIONAL" ${student.course === 'BASIC_PROFESSIONAL' ? 'selected' : ''}>Basic + Professional (4 months)</option>
+                    <option value="INTERMEDIATE_PROFESSIONAL" ${student.course === 'INTERMEDIATE_PROFESSIONAL' ? 'selected' : ''}>Intermediate + Professional (5 months)</option>
+                    <option value="ALL" ${student.course === 'ALL' ? 'selected' : ''}>All Courses - Complete Package (6 months)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -613,9 +620,9 @@ function editVideo(videoId) {
             <div class="form-group">
                 <label class="form-label">Course Level *</label>
                 <select name="course" class="form-select" required>
-                    <option value="BASIC" ${video.course === 'BASIC' ? 'selected' : ''}>Basic</option>
-                    <option value="INTERMEDIATE" ${video.course === 'INTERMEDIATE' ? 'selected' : ''}>Intermediate</option>
-                    <option value="PROFESSIONAL" ${video.course === 'PROFESSIONAL' ? 'selected' : ''}>Professional</option>
+                    <option value="BASIC" ${video.course === 'BASIC' ? 'selected' : ''}>Basic Level</option>
+                    <option value="INTERMEDIATE" ${video.course === 'INTERMEDIATE' ? 'selected' : ''}>Intermediate Level</option>
+                    <option value="PROFESSIONAL" ${video.course === 'PROFESSIONAL' ? 'selected' : ''}>Professional Level</option>
                 </select>
             </div>
             <div class="form-group">
