@@ -226,7 +226,12 @@ const AdminDashboard = {
             card.className = 'video-card';
             
             card.innerHTML = `
-                <img src="${video.thumbnail}" alt="${video.title}" class="video-card-thumbnail">
+                <img 
+                    src="${video.thumbnail}" 
+                    alt="${video.title}" 
+                    class="w-full h-32 object-cover rounded-lg bg-gray-200"
+                    onerror="this.src='https://via.placeholder.com/640x360/8b5cf6/ffffff?text=Video+Thumbnail'"
+                >
                 <div class="p-4">
                     <div class="flex items-center space-x-2 mb-2">
                         <span class="badge badge-info">Week ${video.week}</span>
@@ -557,10 +562,13 @@ function showAddVideoModal() {
         // Generate ID
         videoData._id = `week${videoData.week}_video_${Utils.generateId()}`;
         videoData.week = parseInt(videoData.week);
-        
+
         // Default thumbnail if not provided
         if (!videoData.thumbnail) {
             videoData.thumbnail = `https://via.placeholder.com/640x360/8b5cf6/ffffff?text=Week+${videoData.week}`;
+        } else {
+            // Auto-fix Google Drive URLs
+            videoData.thumbnail = Utils.convertGDriveUrl(videoData.thumbnail);
         }
 
         try {
@@ -649,6 +657,11 @@ function editVideo(videoId) {
         const formData = new FormData(e.target);
         const updates = Object.fromEntries(formData);
         updates.week = parseInt(updates.week);
+
+        // Auto-fix Google Drive URLs
+        if (updates.thumbnail) {
+            updates.thumbnail = Utils.convertGDriveUrl(updates.thumbnail);
+        }
 
         try {
             await API.call(CONFIG.API.ENDPOINTS.VIDEOS, 'PUT', { videoId, updates });

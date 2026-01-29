@@ -238,6 +238,29 @@ const Utils = {
         return driveUrl;
     },
 
+    // Convert Google Drive URLs to direct image format
+    convertGDriveUrl(url) {
+        if (!url || !url.includes('drive.google.com')) return url;
+        
+        // Extract file ID from various Google Drive URL formats
+        const patterns = [
+            /\/file\/d\/([a-zA-Z0-9_-]+)/,  // /file/d/FILE_ID
+            /id=([a-zA-Z0-9_-]+)/,           // ?id=FILE_ID
+            /\/d\/([a-zA-Z0-9_-]+)/          // /d/FILE_ID
+        ];
+        
+        for (let pattern of patterns) {
+            const match = url.match(pattern);
+            if (match && match[1]) {
+                // Clean file ID (remove any corrupted characters)
+                const fileId = match[1].replace(/[^\w-]/g, '');
+                return `https://drive.google.com/uc?export=view&id=${fileId}`;
+            }
+        }
+        
+        return url;
+    },
+
     // Progress Calculation
     calculateProgress(videosWatched, totalVideos) {
         if (totalVideos === 0) return 0;
