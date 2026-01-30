@@ -21,6 +21,11 @@ const AdminDashboard = {
             
             this.students = await API.getStudents();
             this.videos = await API.getVideos();
+            // Convert all thumbnail URLs
+            this.videos = this.videos.map(video => ({
+                ...video,
+                thumbnail: Utils.convertGDriveUrl(video.thumbnail)
+            }));
             this.stats = await API.getAnalytics('stats');
             
             Utils.showLoader(false);
@@ -224,10 +229,13 @@ const AdminDashboard = {
         this.videos.forEach(video => {
             const card = document.createElement('div');
             card.className = 'video-card';
+
+            // Convert Google Drive URL before displaying
+            const thumbnailUrl = Utils.convertGDriveUrl(video.thumbnail);
             
             card.innerHTML = `
                 <img 
-                    src="${video.thumbnail}" 
+                    src="${thumbnailUrl}"" 
                     alt="${video.title}" 
                     class="w-full h-32 object-cover rounded-lg bg-gray-200"
                     onerror="this.src='https://placehold.co/640x360/8b5cf6/FFF/png?text=Video+Thumbnail'"
