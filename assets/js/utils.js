@@ -242,22 +242,27 @@ const Utils = {
     convertGDriveUrl(url) {
         if (!url || !url.includes('drive.google.com')) return url;
         
+        // If already in correct format, return as is
+        if (url.includes('drive.google.com/uc?export=view&id=')) return url;
+        
         // Extract file ID from various Google Drive URL formats
         const patterns = [
-            /\/file\/d\/([a-zA-Z0-9_-]+)/,  // /file/d/FILE_ID
-            /id=([a-zA-Z0-9_-]+)/,           // ?id=FILE_ID
-            /\/d\/([a-zA-Z0-9_-]+)/          // /d/FILE_ID
+            /\/file\/d\/([a-zA-Z0-9_-]+)/,        // /file/d/FILE_ID
+            /id=([a-zA-Z0-9_-]+)/,                 // ?id=FILE_ID
+            /\/d\/([a-zA-Z0-9_-]+)(?:\/|$|\?)/,   // /d/FILE_ID
+            /open\?id=([a-zA-Z0-9_-]+)/            // open?id=FILE_ID
         ];
         
         for (let pattern of patterns) {
             const match = url.match(pattern);
             if (match && match[1]) {
-                // Clean file ID (remove any corrupted characters)
-                const fileId = match[1].replace(/[^\w-]/g, '');
-                return `https://drive.google.com/uc?export=view&id=${fileId}`;
+                const fileId = match[1].trim();
+                // Use thumbnail endpoint for better image loading
+                return `https://drive.google.com/thumbnail?id=${fileId}&sz=w640`;
             }
         }
         
+        console.warn('Could not parse Google Drive URL:', url);
         return url;
     },
 

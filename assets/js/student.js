@@ -51,6 +51,7 @@ const StudentDashboard = {
                 })
                 .map(video => ({
                     ...video,
+                    thumbnail: Utils.convertGDriveUrl(video.thumbnail),
                     isUnlocked: this.isVideoUnlocked(video)
                 }))
                 .sort((a, b) => a.week - b.week || new Date(a.unlockDate) - new Date(b.unlockDate));
@@ -166,7 +167,12 @@ const StudentDashboard = {
             <div class="flex flex-col md:flex-row gap-4">
                 <!-- Thumbnail -->
                 <div class="relative md:w-48 flex-shrink-0">
-                    <img src="${video.thumbnail}" alt="${video.title}" class="w-full h-32 object-cover rounded-lg">
+                    <img 
+                        src="${video.thumbnail}" 
+                        alt="${video.title}" 
+                        class="w-full h-32 object-cover rounded-lg bg-gray-200"
+                        onerror="this.src='https://placehold.co/640x360/8b5cf6/FFF/png?text=Video'"
+                    >
                     ${!video.isUnlocked ? `
                         <div class="locked-overlay">
                             <div class="text-center text-white">

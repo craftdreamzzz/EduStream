@@ -230,7 +230,7 @@ const AdminDashboard = {
                     src="${video.thumbnail}" 
                     alt="${video.title}" 
                     class="w-full h-32 object-cover rounded-lg bg-gray-200"
-                    onerror="this.src='https://via.placeholder.com/640x360/8b5cf6/ffffff?text=Video+Thumbnail'"
+                    onerror="this.src='https://placehold.co/640x360/8b5cf6/FFF/png?text=Video+Thumbnail'"
                 >
                 <div class="p-4">
                     <div class="flex items-center space-x-2 mb-2">
@@ -565,10 +565,11 @@ function showAddVideoModal() {
 
         // Default thumbnail if not provided
         if (!videoData.thumbnail) {
-            videoData.thumbnail = `https://via.placeholder.com/640x360/8b5cf6/ffffff?text=Week+${videoData.week}`;
+            videoData.thumbnail = `https://placehold.co/640x360/8b5cf6/FFF/png?text=Week+${videoData.week}`;
         } else {
             // Auto-fix Google Drive URLs
             videoData.thumbnail = Utils.convertGDriveUrl(videoData.thumbnail);
+            console.log('Converted thumbnail URL:', videoData.thumbnail);
         }
 
         try {
