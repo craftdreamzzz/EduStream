@@ -30,19 +30,22 @@ module.exports = async (req, res) => {
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
 
+      const { courseStartDate } = req.body;
+
       const newStudent = {
-        username,
-        password: hashedPassword,
-        name,
-        email: email || '',
-        phone: phone || '',
-        course,
-        expiry,
-        active: true,
-        joinDate: new Date().toISOString(),
-        videosWatched: [],
-        lastLogin: null,
-        progress: 0
+          username,
+          password: hashedPassword,
+          name,
+          email: email || '',
+          phone: phone || '',
+          course,
+          courseStartDate: courseStartDate || new Date().toISOString(),
+          expiry,
+          active: true,
+          joinDate: new Date().toISOString(),
+          videosWatched: [],
+          lastLogin: null,
+          progress: 0
       };
 
       await db.collection('students').insertOne(newStudent);

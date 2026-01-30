@@ -260,7 +260,7 @@ const AdminDashboard = {
                     <h3 class="font-bold text-gray-900 mb-2">${video.title}</h3>
                     <p class="text-sm text-gray-600 mb-3">${video.description.substring(0, 80)}...</p>
                     <div class="flex items-center justify-between text-xs text-gray-500 mb-3">
-                        <span>📅 ${Utils.formatDate(video.unlockDate)}</span>
+                        <span>📚 Lesson ${video.lessonOrder || '-'}</span>
                         <span>👁️ ${video.viewed || 0} views</span>
                     </div>
                     <div class="flex space-x-2">
@@ -373,6 +373,11 @@ async function showAddStudentModal() {
                 </select>
             </div>
             <div class="form-group">
+                <label class="form-label">Course Start Date *</label>
+                <input type="date" name="courseStartDate" class="form-input" required>
+                <p class="text-xs text-gray-500 mt-1">Videos will unlock based on this date</p>
+            </div>
+            <div class="form-group">
                 <label class="form-label">Expiry Date *</label>
                 <input type="date" name="expiry" class="form-input" required>
             </div>
@@ -433,6 +438,11 @@ async function editStudent(username) {
                     <option value="INTERMEDIATE_PROFESSIONAL" ${student.course === 'INTERMEDIATE_PROFESSIONAL' ? 'selected' : ''}>Intermediate + Professional (5 months)</option>
                     <option value="ALL" ${student.course === 'ALL' ? 'selected' : ''}>All Courses - Complete Package (6 months)</option>
                 </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Course Start Date *</label>
+                <input type="date" name="courseStartDate" value="${student.courseStartDate || student.joinDate}" class="form-input" required>
+                <p class="text-xs text-gray-500 mt-1">Videos unlock based on this date</p>
             </div>
             <div class="form-group">
                 <label class="form-label">Expiry Date *</label>
@@ -523,10 +533,10 @@ function showAddVideoModal() {
                 <input type="url" name="driveLink" class="form-input" placeholder="https://drive.google.com/file/d/..." required>
                 <p class="text-xs text-gray-500 mt-1">Upload video to Google Drive first and paste the shareable link</p>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-3 gap-4">
                 <div class="form-group">
                     <label class="form-label">Week *</label>
-                    <input type="number" name="week" class="form-input" min="1" required>
+                    <input type="number" name="week" class="form-input" min="1" max="12" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Day *</label>
@@ -535,16 +545,15 @@ function showAddVideoModal() {
                         <option value="Thursday">Thursday</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Lesson Order *</label>
+                    <input type="number" name="lessonOrder" class="form-input" min="1" placeholder="1, 2, 3..." required>
+                    <p class="text-xs text-gray-500 mt-1">Sequential order of this lesson</p>
+                </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="form-group">
-                    <label class="form-label">Unlock Date *</label>
-                    <input type="date" name="unlockDate" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Duration *</label>
-                    <input type="text" name="duration" class="form-input" placeholder="45 mins" required>
-                </div>
+            <div class="form-group">
+                <label class="form-label">Duration *</label>
+                <input type="text" name="duration" class="form-input" placeholder="45 mins" required>
             </div>
             <div class="form-group">
                 <label class="form-label">Course Level *</label>
@@ -582,6 +591,7 @@ function showAddVideoModal() {
         // Generate ID
         videoData._id = `week${videoData.week}_video_${Utils.generateId()}`;
         videoData.week = parseInt(videoData.week);
+        videoData.lessonOrder = parseInt(videoData.lessonOrder);
 
         // Default thumbnail if not provided
         if (!videoData.thumbnail) {
@@ -623,7 +633,7 @@ function editVideo(videoId) {
                 <label class="form-label">Google Drive Link *</label>
                 <input type="url" name="driveLink" value="${video.driveLink}" class="form-input" required>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-3 gap-4">
                 <div class="form-group">
                     <label class="form-label">Week *</label>
                     <input type="number" name="week" value="${video.week}" class="form-input" min="1" required>
@@ -635,16 +645,14 @@ function editVideo(videoId) {
                         <option value="Thursday" ${video.day === 'Thursday' ? 'selected' : ''}>Thursday</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Lesson Order *</label>
+                    <input type="number" name="lessonOrder" value="${video.lessonOrder || 1}" class="form-input" min="1" required>
+                </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="form-group">
-                    <label class="form-label">Unlock Date *</label>
-                    <input type="date" name="unlockDate" value="${video.unlockDate}" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Duration *</label>
-                    <input type="text" name="duration" value="${video.duration}" class="form-input" required>
-                </div>
+            <div class="form-group">
+                <label class="form-label">Duration *</label>
+                <input type="text" name="duration" value="${video.duration}" class="form-input" required>
             </div>
             <div class="form-group">
                 <label class="form-label">Course Level *</label>
@@ -678,6 +686,7 @@ function editVideo(videoId) {
         const formData = new FormData(e.target);
         const updates = Object.fromEntries(formData);
         updates.week = parseInt(updates.week);
+        updates.lessonOrder = parseInt(updates.lessonOrder);
 
         // Auto-fix Google Drive URLs
         if (updates.thumbnail) {

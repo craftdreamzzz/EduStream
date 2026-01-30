@@ -96,6 +96,27 @@ const Utils = {
         return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     },
 
+    // Helper Function for Dynamic Unlock Calculation
+    calculateVideoUnlockDate(courseStartDate, week, day) {
+        const startDate = new Date(courseStartDate);
+        
+        // Get day of week (0 = Sunday, 1 = Monday, etc.)
+        const targetDay = day === 'Monday' ? 1 : 4; // Thursday = 4
+        
+        // Find first occurrence of target day on or after start date
+        let unlockDate = new Date(startDate);
+        while (unlockDate.getDay() !== targetDay) {
+            unlockDate.setDate(unlockDate.getDate() + 1);
+        }
+        
+        // Add weeks offset (week 1 = first occurrence, week 2 = +7 days, etc.)
+        if (week > 1) {
+            unlockDate.setDate(unlockDate.getDate() + ((week - 1) * 7));
+        }
+        
+        return unlockDate.toISOString().split('T')[0]; // Return YYYY-MM-DD
+    },
+
     getNextVideoDay() {
         const today = new Date();
         const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.

@@ -54,7 +54,7 @@ const StudentDashboard = {
                     thumbnail: Utils.convertGDriveUrl(video.thumbnail),
                     isUnlocked: this.isVideoUnlocked(video)
                 }))
-                .sort((a, b) => a.week - b.week || new Date(a.unlockDate) - new Date(b.unlockDate));
+                .sort((a, b) => a.week - b.week || (a.lessonOrder || 0) - (b.lessonOrder || 0));
 
             this.allVideos = this.userVideos;
 
@@ -65,11 +65,18 @@ const StudentDashboard = {
     },
 
     isVideoUnlocked(video) {
-        const unlockDate = new Date(video.unlockDate);
+        // Calculate unlock date based on student's course start date
+        const unlockDate = Utils.calculateVideoUnlockDate(
+            this.currentUser.courseStartDate || this.currentUser.joinDate,
+            video.week,
+            video.day
+        );
+        
+        const unlockDateTime = new Date(unlockDate);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
-        return unlockDate <= today;
+        return unlockDateTime <= today;
     },
 
     updateDashboard() {
@@ -186,7 +193,13 @@ const StudentDashboard = {
                         <div class="locked-overlay">
                             <div class="text-center text-white">
                                 <span class="text-4xl">🔒</span>
-                                <p class="text-sm mt-2">Unlocks ${Utils.formatDate(video.unlockDate)}</p>
+                                <p class="text-sm mt-2">Unlocks ${Utils.formatDate(
+                                    Utils.calculateVideoUnlockDate(
+                                        this.currentUser.courseStartDate || this.currentUser.joinDate,
+                                        video.week,
+                                        video.day
+                                    )
+                                )}</p>
                             </div>
                         </div>
                     ` : ''}
