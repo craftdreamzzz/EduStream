@@ -162,13 +162,22 @@ const StudentDashboard = {
         card.setAttribute('data-aos-delay', (index * 50).toString());
 
         const isWatched = this.currentUser.videosWatched?.includes(video._id);
+
+        // Convert Google Drive URL
+        let thumbnailUrl = video.thumbnail || '';
+        if (thumbnailUrl.includes('drive.google.com')) {
+            const fileIdMatch = thumbnailUrl.match(/[-\w]{25,}/);
+            if (fileIdMatch) {
+                thumbnailUrl = `https://drive.google.com/thumbnail?id=${fileIdMatch[0]}&sz=w640`;
+            }
+        }
         
         card.innerHTML = `
             <div class="flex flex-col md:flex-row gap-4">
                 <!-- Thumbnail -->
                 <div class="relative md:w-48 flex-shrink-0">
                     <img 
-                        src="${video.thumbnail}" 
+                        src="${thumbnailUrl}" 
                         alt="${video.title}" 
                         class="w-full h-32 object-cover rounded-lg bg-gray-200"
                         onerror="this.src='https://placehold.co/640x360/8b5cf6/FFF/png?text=Video'"

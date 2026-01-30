@@ -229,16 +229,28 @@ const AdminDashboard = {
         this.videos.forEach(video => {
             const card = document.createElement('div');
             card.className = 'video-card';
-
-            // Convert Google Drive URL before displaying
-            const thumbnailUrl = Utils.convertGDriveUrl(video.thumbnail);
+            
+            // CRITICAL: Convert Google Drive URL to thumbnail format
+            let thumbnailUrl = video.thumbnail || '';
+            
+            // Check if it's a Google Drive URL and convert it
+            if (thumbnailUrl.includes('drive.google.com')) {
+                const fileIdMatch = thumbnailUrl.match(/[-\w]{25,}/);
+                if (fileIdMatch) {
+                    thumbnailUrl = `https://drive.google.com/thumbnail?id=${fileIdMatch[0]}&sz=w640`;
+                }
+            }
+            
+            // Fallback if no thumbnail or conversion failed
+            if (!thumbnailUrl || thumbnailUrl === video.thumbnail && thumbnailUrl.includes('/file/d/')) {
+                thumbnailUrl = `https://placehold.co/640x360/8b5cf6/FFF/png?text=Week+${video.week}`;
+            }
             
             card.innerHTML = `
                 <img 
-                    src="${thumbnailUrl}"" 
+                    src="${thumbnailUrl}" 
                     alt="${video.title}" 
                     class="w-full h-32 object-cover rounded-lg bg-gray-200"
-                    onerror="this.src='https://placehold.co/640x360/8b5cf6/FFF/png?text=Video+Thumbnail'"
                 >
                 <div class="p-4">
                     <div class="flex items-center space-x-2 mb-2">
